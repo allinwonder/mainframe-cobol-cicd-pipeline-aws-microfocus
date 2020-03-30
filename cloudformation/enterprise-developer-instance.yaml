@@ -90,14 +90,14 @@ Resources:
           Fn::Join:
           - ''
           - - "<script>\n"
-            - 'mkdir c:\cfn'
-            - 'mkdir c:\cfn\log'
-            - 'c:\"Program Files"\Amazon\cfn-bootstrap\cfn-init.exe -s '
+            - "mkdir c:\\cfn\n"
+            - "mkdir c:\\cfn\\log\n"
+            - "c:\\\"Program Files\"\\Amazon\\cfn-bootstrap\\cfn-init.exe -s "
             - Ref: AWS::StackName
             - " --region "
             - Ref: AWS::Region
             - " -r EnterpriseDeveloperWorkstation > c:\\cfn\\log\\cfn-call-log 2>&1"
-            - "</script>"      
+            - "</script>"
       Tags:
       - Key: Solution
         Value: mainframe-cobol-cicd-aws-microfocus
@@ -116,7 +116,7 @@ Resources:
       Count: 1
       Handle: !Ref WaitHandle
       Timeout: '900'
-      
+
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

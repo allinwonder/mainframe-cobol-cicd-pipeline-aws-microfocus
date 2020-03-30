@@ -171,9 +171,9 @@ Resources:
           Fn::Join:
           - ''
           - - "<script>\n"
-            - 'mkdir c:\cfn'
-            - 'mkdir c:\cfn\log'
-            - 'c:\"Program Files"\Amazon\cfn-bootstrap\cfn-init.exe -s '
+            - "mkdir c:\\cfn\n"
+            - "mkdir c:\\cfn\\log\n"
+            - "c:\\\"Program Files\"\\Amazon\\cfn-bootstrap\\cfn-init.exe -s "
             - Ref: AWS::StackName
             - " --region "
             - Ref: AWS::Region
