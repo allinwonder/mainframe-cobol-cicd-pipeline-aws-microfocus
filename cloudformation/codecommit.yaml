@@ -1,0 +1,28 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: CodeCommit For Mainframe COBAL Code
+
+Parameters:
+  RepositoryName:
+    Type: String
+    MaxLength: 100
+    Description: Name of the Git repository which hosts the mainframe code
+
+Resources:
+  Repository:
+    Type: AWS::CodeCommit::Repository
+    Properties: 
+      RepositoryDescription: COBAL Code Repository of AWS Mainframe COBOL CICD Pipeline AWS Micro Focus
+      RepositoryName: !Ref RepositoryName
+      Tags: 
+        - Key: Solution
+          Value: mainframe-cobol-cicd-aws-microfocus
+        - Key: Stack
+          Value: CodeCommit
+Outputs:
+  RepositoryName:
+    Description: Name of the Git repository which hosts the mainframe code
+    Value: !Ref RepositoryName
+
+

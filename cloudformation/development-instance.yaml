@@ -1,0 +1,117 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Join Windows instance to AWS-Active Directory or Microsoft AD (no powershell).
+  Create SSM document, IAM Role, SSM doc and EC2 Instance. Attaches EC2 instance to
+  AD. Will need to use Domain Logins to RDP in.
+Parameters:
+  AMI:
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Description: Latest Windows 2016 AMI
+    Default: "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base"
+  WindowsInstanceSubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet to place instance in
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC to place instance in
+  InstanceType:
+    Type: String
+    Default: m3.large
+    AllowedValues:
+    - t1.micro
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - m1.small
+    - m1.medium
+    - m1.large
+    - m1.xlarge
+    - m2.xlarge
+    - m2.2xlarge
+    - m2.4xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - c1.medium
+    - c1.xlarge
+    - c3.large
+    - c3.xlarge
+    - c3.2xlarge
+    - c3.4xlarge
+    - c3.8xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - g2.2xlarge
+    - r3.large
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r3.8xlarge
+    - i2.xlarge
+    - i2.2xlarge
+    - i2.4xlarge
+    - i2.8xlarge
+    - d2.xlarge
+    - d2.2xlarge
+    - d2.4xlarge
+    - d2.8xlarge
+    - hi1.4xlarge
+    - hs1.8xlarge
+    - cr1.8xlarge
+    - cc2.8xlarge
+    - cg1.4xlarge
+    ConstraintDescription: Must be a valid EC2 instance type.
+Resources:
+  WindowsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: !Ref AMI
+      InstanceType: !Ref InstanceType
+      Tags:
+      - Key: Solution
+        Value: mainframe-cobol-cicd-aws-microfocus
+      - Key: Name
+        Value: Development Workspace
+      - Key: Stack
+        Value: development-instance
+      SubnetId:
+        Ref: WindowsInstanceSubnetId
+      SecurityGroupIds: 
+      - !GetAtt InstanceSecurityGroup.GroupId
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+      - !Ref EC2SSMRole
+  EC2SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3389'
+        ToPort: '3389'
+        CidrIp: 0.0.0.0/0
+
