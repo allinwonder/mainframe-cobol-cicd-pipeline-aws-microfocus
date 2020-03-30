@@ -1,0 +1,39 @@
+---
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECR Repository for Solution Mainframe COBOL CICD AWS MicroFocus
+
+Parameters:
+  RepositoryName:
+    Type: String
+    Description: Micro Focus Build Tool ECR Repository Name
+  CodeBuildIAMRoleArn:
+    Type: String
+    Description: CodeBuild Instance IAM Role that allows to pull MicroFocus Enterprise Developer Build Tools Image
+
+Resources: 
+  BuildToolRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Ref RepositoryName
+      RepositoryPolicyText: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Sid: AllowPull
+            Effect: Allow
+            Principal: 
+              AWS: 
+                - !Ref CodeBuildIAMRoleArn
+            Action: 
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+      Tags: 
+        - Key: Solution
+          Value: mainframe-cobol-cicd-aws-microfocus
+        - Key: Stack
+          Value: Micro Focus Build Tool ECR Repository
+Outputs:
+  BuildToolRepositoryArn:
+    Value: !GetAtt BuildToolRepository.Arn
