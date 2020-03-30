@@ -76,9 +76,9 @@ Resources:
       - Key: Solution
         Value: mainframe-cobol-cicd-aws-microfocus
       - Key: Name
-        Value: Development Workspace
+        Value: Enterprise Developer
       - Key: Stack
-        Value: development-instance
+        Value: Enterprise Developer
       SubnetId:
         Ref: WindowsInstanceSubnetId
       SecurityGroupIds: 
