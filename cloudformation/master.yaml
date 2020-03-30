@@ -31,17 +31,17 @@
           Value: VPC
         TemplateURL: !Sub "https://${BucketName}.s3.amazonaws.com/vpc.yaml"
         TimeoutInMinutes: 15
-    WindowsInstance:
+    EnterpriseDeveloperWorkstation:
       Type: AWS::CloudFormation::Stack
       Properties:
         Parameters:
           VPC: !GetAtt VPC.Outputs.VPCId
-          WindowsInstanceSubnetId: !GetAtt VPC.Outputs.PrivateSubnet0
+          PrivateSubnetId: !GetAtt VPC.Outputs.PrivateSubnet0
         Tags:
         - Key: Solution
           Value: mainframe-cobol-cicd-aws-microfocus
         - Key: Stack
-          Value: Enterprise Developer Instance
+          Value: "Enterprise Developer Instance"
         TemplateURL: !Sub "https://${BucketName}.s3.amazonaws.com/enterprise-developer-instance.yaml"
         TimeoutInMinutes: 15
     CodeRepository:
@@ -68,7 +68,21 @@
         - Key: Solution
           Value: mainframe-cobol-cicd-aws-microfocus
         - Key: Stack
-          Value: CI-CD Pipeline          
+          Value: CICD pipeline     
+    EnterpriseTestServer:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        Parameters:
+          VPC: !GetAtt VPC.Outputs.VPCId
+          PrivateSubnetId: !GetAtt VPC.Outputs.PrivateSubnet0
+          ArtifactBucketName: !GetAtt CicdPipeline.Outputs.ArtifactS3BucketName
+        Tags:
+        - Key: Solution
+          Value: mainframe-cobol-cicd-aws-microfocus
+        - Key: Stack
+          Value: "Enterprise Test Server"
+        TemplateURL: !Sub "https://${BucketName}.s3.amazonaws.com/enterprise-test-server.yaml"
+        TimeoutInMinutes: 15                  
     EcrRepository:
       Type: AWS::CloudFormation::Stack
       Properties:

@@ -16,9 +16,12 @@ Parameters:
     Description: Docker image to use for the build phase
 
 Resources:
-  PipelineS3Bucket:
+  ArtifactS3Bucket:
     Type: AWS::S3::Bucket
   
+  PipelineS3Bucket:
+    Type: AWS::S3::Bucket
+    
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
@@ -52,6 +55,8 @@ Resources:
                 Resource:
                   - !GetAtt PipelineS3Bucket.Arn
                   - !Sub '${PipelineS3Bucket.Arn}/*'
+                  - !GetAtt ArtifactS3Bucket.Arn
+                  - !Sub '${ArtifactS3Bucket.Arn}/*'                  
         - PolicyName: CanAccessEcr
           PolicyDocument: 
             Version: 2012-10-17
@@ -254,10 +259,9 @@ Outputs:
   CodeBuildRoleArn:
     Description: IAM Role ARN associated with CodeBuild projects
     Value: !GetAtt CodeBuildRole.Arn
-    Export:
-      Name: !Sub '${AWS::StackName}CodeBuildRoleArn'
   CodeBuildRoleName:
     Description: IAM Role name associated with CodeBuild projects
     Value: !Ref CodeBuildRole
-    Export:
-      Name: !Sub '${AWS::StackName}CodeBuildRoleName'
+  ArtifactS3BucketName:
+    Description: An S3 Bucket stores Artifacts
+    Value: !Ref ArtifactS3Bucket

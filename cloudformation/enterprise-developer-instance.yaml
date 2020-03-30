@@ -1,14 +1,12 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Join Windows instance to AWS-Active Directory or Microsoft AD (no powershell).
-  Create SSM document, IAM Role, SSM doc and EC2 Instance. Attaches EC2 instance to
-  AD. Will need to use Domain Logins to RDP in.
+Description: MicroFocus Enterprise Developer Workstation
 Parameters:
   AMI:
     Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
     Description: Latest Windows 2016 AMI
     Default: "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base"
-  WindowsInstanceSubnetId:
+  PrivateSubnetId:
     Type: AWS::EC2::Subnet::Id
     Description: Subnet to place instance in
   VPC:
@@ -66,12 +64,40 @@ Parameters:
     - cg1.4xlarge
     ConstraintDescription: Must be a valid EC2 instance type.
 Resources:
-  WindowsInstance:
+  EnterpriseDeveloperWorkstation:
     Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            99-signal-ready:
+              command:
+                Fn::Join:
+                - ''
+                - - '"C:\Program Files\Amazon\cfn-bootstrap\cfn-signal"'
+                  - ' -e 0 "'
+                  - Ref: WaitHandle
+                  - "\""
+              waitAfterCompletion: 0
     Properties:
       IamInstanceProfile: !Ref InstanceProfile
       ImageId: !Ref AMI
       InstanceType: !Ref InstanceType
+      SecurityGroupIds: 
+      - !GetAtt InstanceSecurityGroup.GroupId      
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+          - ''
+          - - "<script>\n"
+            - 'mkdir c:\cfn'
+            - 'mkdir c:\cfn\log'
+            - 'c:\"Program Files"\Amazon\cfn-bootstrap\cfn-init.exe -s '
+            - Ref: AWS::StackName
+            - " --region "
+            - Ref: AWS::Region
+            - " -r EnterpriseDeveloperWorkstation > c:\\cfn\\log\\cfn-call-log 2>&1"
+            - "</script>"      
       Tags:
       - Key: Solution
         Value: mainframe-cobol-cicd-aws-microfocus
@@ -80,9 +106,17 @@ Resources:
       - Key: Stack
         Value: Enterprise Developer
       SubnetId:
-        Ref: WindowsInstanceSubnetId
-      SecurityGroupIds: 
-      - !GetAtt InstanceSecurityGroup.GroupId
+        Ref: PrivateSubnetId
+
+  WaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  WaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Properties:
+      Count: 1
+      Handle: !Ref WaitHandle
+      Timeout: '900'
+      
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -113,5 +147,5 @@ Resources:
       - IpProtocol: tcp
         FromPort: '3389'
         ToPort: '3389'
-        CidrIp: 0.0.0.0/0
+        CidrIp: 0.0.0.0/0        
 
